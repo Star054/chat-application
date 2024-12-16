@@ -1,0 +1,52 @@
+<!-- chat.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat en Tiempo Real</title>
+</head>
+<body>
+<h1>Chat en Tiempo Real</h1>
+<p>Bienvenido, <span id="username"></span></p>
+
+<div id="chatBox"></div>
+
+<input type="text" id="message" placeholder="Escribe tu mensaje...">
+<button onclick="sendMessage()">Enviar</button>
+
+<script>
+    // Obtener el nombre de usuario de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const username = urlParams.get('username');
+    document.getElementById('username').textContent = username;
+
+    // Conectar al WebSocket
+    var socket = new WebSocket('ws://localhost:8080/chat');
+
+    socket.onopen = function(event) {
+        console.log("Conexión WebSocket establecida");
+    };
+
+    socket.onmessage = function(event) {
+        const chatBox = document.getElementById('chatBox');
+        chatBox.innerHTML += '<p>' + event.data + '</p>';
+    };
+
+    socket.onerror = function(error) {
+        console.error('Error de WebSocket:', error);
+    };
+
+    // Función para enviar el mensaje
+    function sendMessage() {
+        const message = document.getElementById("message").value;
+        if (message) {
+            const messageToSend = username + ": " + message; // Agregar el nombre de usuario al mensaje
+            socket.send(messageToSend);
+            document.getElementById("message").value = ""; // Limpiar el campo de texto
+        }
+    }
+</script>
+
+</body>
+</html>
